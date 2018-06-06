@@ -3,9 +3,8 @@
 #include <GL/glut.h>
 #include <stdio.h>
 
-int width = 800, height = 600; //Largura e altura da janela
 
-//ROLA MUITO GRANDE
+int width = 800, height = 600; //Largura e altura da janela
 
 void init(void);
 void keyboard (unsigned char key, int x, int y);
