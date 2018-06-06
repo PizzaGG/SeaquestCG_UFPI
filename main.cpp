@@ -5,6 +5,7 @@
 
 int width = 800, height = 600; //Largura e altura da janela
 
+//ROLA
 
 void init(void);
 void keyboard (unsigned char key, int x, int y);
