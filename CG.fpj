@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project>
-	<Libs Value="-mwindows -static -lglut32 -lglu32 -lopengl32 -lwinmm -lgdi32"/>
-	<Flags Value="-DGLUT_STATIC"/>
+	<Libs Value="-mwindows -static -lglut32 -lglu32 -lopengl32 -lwinmm -lgdi32 -lmingw32 -lSDLmain -lSDL"/>
+	<Flags Value="-DGLUT_STATIC -I&quot;Biblioteca SDL\SDL-1.2.15\include\SDL&quot;"/>
 	<Target Value="CG.exe"/>
-	<CommandLine Value=""/>
+	<CommandLine Value="-lmingw32 -lSDLmain -lSDL"/>
 	<CompilerOptions Value="-Wall -s"/>
 	<DeleteObjectsBefore Value="Yes"/>
 	<DeleteObjectsAfter Value="Yes"/>

@@ -2,7 +2,7 @@
 #include <GL/glu.h>
 #include <GL/glut.h>
 #include <stdio.h>
-
+#include <SDL/SDL.h>
 
 int width = 800, height = 600; //Largura e altura da janela
 
