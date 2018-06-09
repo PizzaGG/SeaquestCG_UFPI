@@ -1,8 +1,0 @@
-# depslib dependency file v1.0
-1528315461 source:c:\users\messias henrique\documents\ufpi\8º período\computação gráfica\exercícios\trabalho final\referência\seaquestcg_ufpi\main.cpp
-	<GL/gl.h>
-	<GL/glu.h>
-	<GL/glut.h>
-	<stdio.h>
-	<SDL/SDL.h>
-
