@@ -1,0 +1,72 @@
+/**********************************************************************/
+/*                                                                    */
+/*                         Carrega objeto                             */
+/*                                                                    */
+/**********************************************************************/
+void carregaObjeto()  //*fname é nome do arquivo, como é ponteiro é chamado como uma string.
+{
+	FILE *fp; //Ponteiro que representa o arquivo dentro desta função
+	int read; //inteiro que pegará o numero de parâmetros recebidos da linha
+	GLfloat x, y, z; // Float que armazenara os valores de cada linha de x, y, z
+	char ch; //primeiro caratere lido de cada linha
+	car = glGenLists(1); //Variável global recebendo o numero que representará o objeto no OpenGL.
+	fp = fopen("submarine.obj"/*fname*/, "r"); //instanciando o arquivo em modo somente de leitura
+	if(!fp)  //se o fp retornar falso, ou seja não funcionou como deveria
+	{
+		//printf("can´t open file %s\n"); //Reposta dado ao usuário
+		exit(1); //chamando a saída do programa.
+	}
+	glPointSize(100.0); //Especifica o diâmetro dos pontos.
+	glNewList(car, GL_COMPILE); //Especificando que o objeto ficará em uma lista do OpenGL, referenciado pelo numero car.
+	{
+		glPushMatrix(); //Coloca a matriz posterior como a atual, ou seja aquela que será trabalhada.
+		glBegin(GL_POINTS); //Defini que a matriz será representado com pontos.
+		while(!(feof(fp)))  //Enquanto não chegar o final do arquivo
+		{
+			read = fscanf(fp, "%c %f %f %f", &ch, &x, &y, &z); //numero de parâmetros recebidos, além disso coloca valores na variavel ch,x,y,z
+			if(read == 4 && ch == 'v') // se o numero de parametros recebidos for 4 e o primeiro carater for v então
+			{
+				glVertex3f(x, y, z); //Função que manda a linha das matrizes para o OpenGL
+			}
+		}
+		glEnd(); //Fim da composição da Matriz
+	}
+	glPopMatrix(); //A Matrix anterior não está sendo trabalhada
+	glEndList(); //A Lista está pronta.
+	fclose(fp); //O arquivo então será fechado
+}
+//fim do obj loader
+
+void carregaObjeto02()  //*fname é nome do arquivo, como é ponteiro é chamado como uma string.
+{
+	FILE *fp; //Ponteiro que representa o arquivo dentro desta função
+	int read; //inteiro que pegará o numero de parâmetros recebidos da linha
+	GLfloat x, y, z; // Float que armazenara os valores de cada linha de x, y, z
+	char ch; //primeiro caratere lido de cada linha
+	car = glGenLists(1); //Variável global recebendo o numero que representará o objeto no OpenGL.
+	fp = fopen("Objeto02.obj"/*fname*/, "r"); //instanciando o arquivo em modo somente de leitura
+	if(!fp)  //se o fp retornar falso, ou seja não funcionou como deveria
+	{
+		//printf("can´t open file %s\n"); //Reposta dado ao usuário
+		exit(1); //chamando a saída do programa.
+	}
+	glPointSize(100.0); //Especifica o diâmetro dos pontos.
+	glNewList(car, GL_COMPILE); //Especificando que o objeto ficará em uma lista do OpenGL, referenciado pelo numero car.
+	{
+		glPushMatrix(); //Coloca a matriz posterior como a atual, ou seja aquela que será trabalhada.
+		glBegin(GL_POINTS); //Defini que a matriz será representado com pontos.
+		while(!(feof(fp)))  //Enquanto não chegar o final do arquivo
+		{
+			read = fscanf(fp, "%c %f %f %f", &ch, &x, &y, &z); //numero de parâmetros recebidos, além disso coloca valores na variavel ch,x,y,z
+			if(read == 4 && ch == 'v') // se o numero de parametros recebidos for 4 e o primeiro carater for v então
+			{
+				glVertex3f(x, y, z); //Função que manda a linha das matrizes para o OpenGL
+			}
+		}
+		glEnd(); //Fim da composição da Matriz
+	}
+	glPopMatrix(); //A Matrix anterior não está sendo trabalhada
+	glEndList(); //A Lista está pronta.
+	fclose(fp); //O arquivo então será fechado
+}
+//fim do obj loader

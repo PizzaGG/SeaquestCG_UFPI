@@ -9,10 +9,9 @@ float pos_X = 0, pos_Y = 0, pos_Z = -105;
 GLuint car; //inteiro especial do OpenGL, os "objetos" gravados no OpenGL são chamados por numero, gravado no próprio OpenGL e não no programa
 float carrot; //float para controle de movimentação.
 
-
-void init_glut(const char *window_name, int argc, char** argv);
-void desenha_objeto();
-//void desenha_objetoMOVIMENTO(float x, float y, float z);
+void init_glut();
+void desenha_principal();
+void desenha_2();
 void display();
 void reshape(int w, int h);
 void keyboard(unsigned char key, int x, int y);
@@ -22,58 +21,75 @@ void keyboard(unsigned char key, int x, int y);
 /*                       Função principal (main)                      */
 /*                                                                    */
 /**********************************************************************/
+
+
 int main(int argc, char **argv)  // Função principal
 {
-	init_glut("Seaquest", argc, argv);
-
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+	glutInitWindowSize(450, 350);
+	glutCreateWindow("Seaquest");
+	init_glut();
+	glutDisplayFunc(display);
+	glutReshapeFunc(reshape);
+	glutKeyboardFunc(keyboard);
 	/* função de controlo do GLUT */
 	glutMainLoop();
 
 	return 0;
 }
 
-
-/**********************************************************************/
-/*                                                                    */
-/*                         Carrega objeto                             */
-/*                                                                    */
-/**********************************************************************/
-void carregaObjeto()  //*fname é nome do arquivo, como é ponteiro é chamado como uma string.
+//void init_glut(const char *nome_janela, int argc, char** argv)
+void init_glut()
 {
-	FILE *fp; //Ponteiro que representa o arquivo dentro desta função
-	int read; //inteiro que pegará o numero de parâmetros recebidos da linha
-	GLfloat x, y, z; // Float que armazenara os valores de cada linha de x, y, z
-	char ch; //primeiro caratere lido de cada linha
-	car = glGenLists(1); //Variável global recebendo o numero que representará o objeto no OpenGL.
-	fp = fopen("submarine.obj"/*fname*/, "r"); //instanciando o arquivo em modo somente de leitura
-	if(!fp)  //se o fp retornar falso, ou seja não funcionou como deveria
-	{
-		//printf("can´t open file %s\n"); //Reposta dado ao usuário
-		exit(1); //chamando a saída do programa.
-	}
-	glPointSize(100.0); //Especifica o diâmetro dos pontos.
-	glNewList(car, GL_COMPILE); //Especificando que o objeto ficará em uma lista do OpenGL, referenciado pelo numero car.
-	{
-		glPushMatrix(); //Coloca a matriz posterior como a atual, ou seja aquela que será trabalhada.
-		glBegin(GL_POINTS); //Defini que a matriz será representado com pontos.
-		while(!(feof(fp)))  //Enquanto não chegar o final do arquivo
-		{
-			read = fscanf(fp, "%c %f %f %f", &ch, &x, &y, &z); //numero de parâmetros recebidos, além disso coloca valores na variavel ch,x,y,z
-			if(read == 4 && ch == 'v') // se o numero de parametros recebidos for 4 e o primeiro carater for v então
-			{
-				glVertex3f(x, y, z); //Função que manda a linha das matrizes para o OpenGL
-			}
-		}
-		glEnd(); //Fim da composição da Matriz
-	}
-	glPopMatrix(); //A Matrix anterior não está sendo trabalhada
-	glEndList(); //A Lista está pronta.
-	fclose(fp); //O arquivo então será fechado
-}
-//fim do obj loader
 
-void init_glut(const char *nome_janela, int argc, char** argv)
-{
+	GLfloat luzAmbiente[] = {0.00, 0.00, 0.00, 1.00};
+	GLfloat luzDifusa[] = {1.00, 1.00, 1.00, 1.00};		 // "cor"
+	GLfloat luzEspecular[] = {0.00, 1.00, 1.00, 1.00}; // "brilho"
+	//GLfloat posicaoLuz[4] = {0.0, 50.0, 50.0, 1.0};
+	GLfloat posicaoLuz[] = {0.00, 50.00, 5.00, 1.00};
+
+	// Capacidade de brilho do material
+	GLfloat materialAmbiente[] = {0.00, 0.00, 0.00, 1.00};
+	GLfloat materialDifusa[] = {1.00, 0.50, 0.50, 1.00};
+	GLfloat materialEspecular[] = {1.00, 0.50, 1.00, 1.00}; //Ks
+	GLfloat materialEmissiva[] = {0.00, 0.00, 0.00, 0.00};
+	GLint especMaterial = 128;
+
+	// Especifica que a cor de fundo da janela será preta
+	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Habilita o modelo de tonalização de Gouraud
+	//glShadeModel(GL_SMOOTH);
+	glShadeModel(GL_FLAT);
+
+	// Define a refletância do material
+	glMaterialfv(GL_FRONT, GL_AMBIENT, materialAmbiente);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, materialDifusa);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, materialEspecular);
+	glMaterialfv(GL_FRONT, GL_EMISSION, materialEmissiva);
+	// Define a concentração do brilho
+	glMateriali(GL_FRONT, GL_SHININESS, especMaterial);
+
+	// Ativa o uso da luz ambiente
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzAmbiente);
+
+	// Define os parâmetros da luz de número 0
+	glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa );
+	glLightfv(GL_LIGHT0, GL_SPECULAR, luzEspecular );
+	glLightfv(GL_LIGHT0, GL_POSITION, posicaoLuz );
+
+	// Habilita a definição da cor do material
+	// a partir da cor corrente
+	glEnable(GL_COLOR_MATERIAL);
+	//Habilita o uso de iluminação
+	glEnable(GL_LIGHTING);
+	// Habilita a luz de número 0
+	glEnable(GL_LIGHT0);
+	// Habilita o depth-buffering
+	glEnable(GL_DEPTH_TEST);
+
+	/*
 	glutInit(&argc, argv); //Incializando o GLUT
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH); //Definindo o modo, memoria, em RGB, Com profundidade
 	glutInitWindowSize(800, 800); // Tamanho da Janela
@@ -84,7 +100,7 @@ void init_glut(const char *nome_janela, int argc, char** argv)
 	glutDisplayFunc(display); //Chama a função a cada frame da tela
 	glutIdleFunc(display); //Chama esta função quando não estiver fazendo nada.
 	glutKeyboardFunc(keyboard);
-	glutMainLoop(); // Cria um loop que volta para as funções anteriores
+	glutMainLoop(); // Cria um loop que volta para as funções anteriores */
 }
 
 void reshape(int w, int h)  //Função chamada toda vez que a janela é redimensionada
@@ -92,13 +108,16 @@ void reshape(int w, int h)  //Função chamada toda vez que a janela é redimension
 	glViewport(0, 0, w, h); // Ajustando o visualizador
 	glMatrixMode(GL_PROJECTION); // Trabalhando com a matriz de projeção
 	glLoadIdentity(); // Iniciando a Matriz de cima
-	gluPerspective(60, (GLfloat)w / (GLfloat)h, 0.1, 1000.0); //Corrigindo a perspectiva
+	gluPerspective(30, (GLfloat)w / (GLfloat)h, 0.1, 1000.0); //Corrigindo a perspectiva
 	//glortho(-25,25,-2,2,0.1,100); //Método alternativo de fazer o mesmo
 	glMatrixMode(GL_MODELVIEW);// Voltando a trabalhar com a matriz de modelo
 }
 
-void desenha_objeto()  //Função de movimentação
+
+
+void desenha_principal()  //Função de movimentação
 {
+	/*
 	glPushMatrix(); //Abrindo as matrizes do modelo
 	glTranslatef(pos_X, pos_Y, pos_Z); // Função para movimentar, X, Y, Z
 	glColor3f(0.5, 0.5, 0.5);
@@ -107,7 +126,42 @@ void desenha_objeto()  //Função de movimentação
 	glCallList(car); //Chamando o nosso objeto incializado por numero
 	glPopMatrix(); // Fechando a matriz
 	carrot = carrot + 0.6; //Aumentando em mais 0.6 o valor do carrot
-	if(carrot > 360)carrot = carrot - 360; //Se o carrot passar de 360º volte a 0
+	if(carrot > 360)carrot = carrot - 360; //Se o carrot passar de 360º volte a 0 */
+
+	glPushMatrix();
+	glTranslatef (pos_X, pos_Y, pos_Z);
+	glColor3f(0.5, 0.5, 0.5);
+	//glScalef(0.2, 0.0, 0.0);
+//	glRotatef (90.0, 0.0, 0.0, 1.0);
+
+	glutSolidCube (10);
+	glPopMatrix();
+}
+
+
+void desenha_2()  //Função de movimentação
+{
+	/*
+	glPushMatrix(); //Abrindo as matrizes do modelo
+	glTranslatef(pos_X, pos_Y, pos_Z); // Função para movimentar, X, Y, Z
+	glColor3f(0.5, 0.5, 0.5);
+	glScalef(0.2, 0.0, 0.0); // Função da escalonar
+	glRotatef(carrot, 0, 1, 0); //Função para rodar grau, e ( x, y, z = sob os eixos que ocorrerá a movimentação)
+	glCallList(car); //Chamando o nosso objeto incializado por numero
+	glPopMatrix(); // Fechando a matriz
+	carrot = carrot + 0.6; //Aumentando em mais 0.6 o valor do carrot
+	if(carrot > 360)carrot = carrot - 360; //Se o carrot passar de 360º volte a 0 */
+
+	glPushMatrix();
+	glTranslatef (pos_X+10, pos_Y+10, pos_Z);
+	glColor3f(0.5, 0.5, 0.5);
+	//glScalef(0.2, 0.0, 0.0);
+//	glRotatef (90.0, 0.0, 0.0, 1.0);
+
+	glutSolidCube (10);
+	glPopMatrix();
+
+
 }
 
 void display(void)  //Função chamada a cada quadro
@@ -115,8 +169,9 @@ void display(void)  //Função chamada a cada quadro
 	glClearColor(0.0, 0.0, 1.0, 1.0); //Cor de fundo
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Limpar tela
 	glLoadIdentity(); //Carregar as entidades
+	gluLookAt (0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 	//chamada da função acima.
-	desenha_objeto();
+	desenha_principal();
 	glutSwapBuffers(); //auxiliar na troca dos buffers(trabalha com a memoria)
 }
 
@@ -127,7 +182,7 @@ void keyboard(unsigned char key, int x, int y)
 	{
 
 	case 'W':
-		if(pos_Y == 60)
+		if(pos_Y == 30)
 		{
 			break;
 		}
@@ -137,7 +192,7 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		break;
 	case 'w':
-		if(pos_Y == 60)
+		if(pos_Y == 30)
 		{
 			break;
 		}
@@ -147,7 +202,7 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		break;
 	case 'S':
-		if(pos_Y == -60)
+		if(pos_Y == -30)
 		{
 			break;
 		}
@@ -157,7 +212,7 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		break;
 	case 's':
-		if(pos_Y == -60)
+		if(pos_Y == -30)
 		{
 			break;
 		}
@@ -167,7 +222,7 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		break;
 	case 'A':
-		if(pos_X == -110)
+		if(pos_X == -60)
 		{
 			break;
 		}
@@ -177,7 +232,7 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		break;
 	case 'a':
-		if(pos_X == -110)
+		if(pos_X == -50)
 		{
 			break;
 		}
@@ -187,7 +242,7 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		break;
 	case 'D':
-		if(pos_X == 110)
+		if(pos_X == 50)
 		{
 			break;
 		}
@@ -197,7 +252,7 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		break;
 	case 'd':
-		if(pos_X == 110)
+		if(pos_X == 50)
 		{
 			break;
 		}

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Layout>
 	<Files>
-		<File Name="Seaquest.c" Top="Yes" Tabpos="1" TopLine="23">
-			<Cursor Line="125" Column="16"/>
+		<File Name="Seaquest.c" Top="No" Tabpos="2" TopLine="228">
+			<Cursor Line="269" Column="1"/>
+			<Selection Line="1" Column="1"/>
 		</File>
 	</Files>
 </Layout>
