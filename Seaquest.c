@@ -1,27 +1,32 @@
-#include <GL/gl.h> // Biblioteca Padrão do OpenGL
-#include <GL/glut.h> //Biblioteca Padrão do GLUT, em alguns sistemas ela chama o freeglut sem precisar declarar freeglut.h
+#include <GL/gl.h> // Biblioteca Padrão do OpenGL;
+#include <GL/glut.h> //Biblioteca Padrão do GLUT;
 #include <stdio.h> // Biblioteca C padrão para controle de entrade e saida.
+#include <stdlib.h> //Para o uso de "rand()";
+#include <time.h> //Para o uso de "time()";
+#include <math.h> //Para o uso de "sqrt()";
 
-//Globais
 
-float pos_X = 0, pos_Y = 0, pos_Z = -105;
+//Variáveis globais
+int posicao_esfera_X = 0, posicao_esfera_Y = 0;
+int posicao_esfera_2_X = -10, posicao_esfera_2_Y = -10;
+bool colisao_esferas = false;
+int pontos = 0;
 
-GLuint car; //inteiro especial do OpenGL, os "objetos" gravados no OpenGL são chamados por numero, gravado no próprio OpenGL e não no programa
-float carrot; //float para controle de movimentação.
-
+/*----------------------------------------------------------------------------*/
 void init_glut();
-void desenha_principal();
-void desenha_2();
+void desenha_esfera();
+void desenha_esfera_2();
+void testa_colisao_esferas();
 void display();
 void reshape(int w, int h);
 void keyboard(unsigned char key, int x, int y);
+void desenha_texto(char *string, int x, int y, void *fonte);
+void iniciar_aleatorio(void);
+/*----------------------------------------------------------------------------*/
 
 /**********************************************************************/
-/*                                                                    */
 /*                       Função principal (main)                      */
-/*                                                                    */
 /**********************************************************************/
-
 
 int main(int argc, char **argv)  // Função principal
 {
@@ -37,45 +42,45 @@ int main(int argc, char **argv)  // Função principal
 
 	return 0;
 }
+/*----------------------------------------------------------------------------*/
 
 //void init_glut(const char *nome_janela, int argc, char** argv)
 void init_glut()
 {
 
-	GLfloat luzAmbiente[] = {0.00, 0.00, 0.00, 1.00};
-	GLfloat luzDifusa[] = {1.00, 1.00, 1.00, 1.00};		 // "cor"
+	//GLfloat luzAmbiente[] = {0.00, 0.00, 0.00, 1.00};
+//	GLfloat luzDifusa[] = {1.00, 1.00, 1.00, 1.00};		 // "cor"
 	GLfloat luzEspecular[] = {0.00, 1.00, 1.00, 1.00}; // "brilho"
-	//GLfloat posicaoLuz[4] = {0.0, 50.0, 50.0, 1.0};
 	GLfloat posicaoLuz[] = {0.00, 50.00, 5.00, 1.00};
 
 	// Capacidade de brilho do material
-	GLfloat materialAmbiente[] = {0.00, 0.00, 0.00, 1.00};
-	GLfloat materialDifusa[] = {1.00, 0.50, 0.50, 1.00};
+//	GLfloat materialAmbiente[] = {1.00, 1.00, 1.00, 1.00};
+	//GLfloat materialDifusa[] = {1.00, 0.50, 0.50, 1.00};
 	GLfloat materialEspecular[] = {1.00, 0.50, 1.00, 1.00}; //Ks
-	GLfloat materialEmissiva[] = {0.00, 0.00, 0.00, 0.00};
-	GLint especMaterial = 128;
+	//GLfloat materialEmissiva[] = {0.00, 0.00, 0.00, 0.00};
+	GLint especMaterial = 20;
 
 	// Especifica que a cor de fundo da janela será preta
 	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// Habilita o modelo de tonalização de Gouraud
-	//glShadeModel(GL_SMOOTH);
-	glShadeModel(GL_FLAT);
+	glShadeModel(GL_SMOOTH);
+	//glShadeModel(GL_FLAT);
 
 	// Define a refletância do material
-	glMaterialfv(GL_FRONT, GL_AMBIENT, materialAmbiente);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, materialDifusa);
+	//glMaterialfv(GL_FRONT, GL_AMBIENT, materialAmbiente);
+	//glMaterialfv(GL_FRONT, GL_DIFFUSE, materialDifusa);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, materialEspecular);
-	glMaterialfv(GL_FRONT, GL_EMISSION, materialEmissiva);
+///	glMaterialfv(GL_FRONT, GL_EMISSION, materialEmissiva);
 	// Define a concentração do brilho
 	glMateriali(GL_FRONT, GL_SHININESS, especMaterial);
 
 	// Ativa o uso da luz ambiente
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzAmbiente);
+//	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzAmbiente);
 
 	// Define os parâmetros da luz de número 0
-	glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa );
+//	glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
+//	glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa );
 	glLightfv(GL_LIGHT0, GL_SPECULAR, luzEspecular );
 	glLightfv(GL_LIGHT0, GL_POSITION, posicaoLuz );
 
@@ -88,19 +93,6 @@ void init_glut()
 	glEnable(GL_LIGHT0);
 	// Habilita o depth-buffering
 	glEnable(GL_DEPTH_TEST);
-
-	/*
-	glutInit(&argc, argv); //Incializando o GLUT
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH); //Definindo o modo, memoria, em RGB, Com profundidade
-	glutInitWindowSize(800, 800); // Tamanho da Janela
-	glutInitWindowPosition(20, 20); //Posição inicial da janela
-	glutCreateWindow("Seaquest"); //Nome da Janela
-	carregaObjeto(); //Carrega o arquivo .obj
-	glutReshapeFunc(reshape); //Chama a função quando a tela for redimensionada
-	glutDisplayFunc(display); //Chama a função a cada frame da tela
-	glutIdleFunc(display); //Chama esta função quando não estiver fazendo nada.
-	glutKeyboardFunc(keyboard);
-	glutMainLoop(); // Cria um loop que volta para as funções anteriores */
 }
 
 void reshape(int w, int h)  //Função chamada toda vez que a janela é redimensionada
@@ -109,59 +101,38 @@ void reshape(int w, int h)  //Função chamada toda vez que a janela é redimension
 	glMatrixMode(GL_PROJECTION); // Trabalhando com a matriz de projeção
 	glLoadIdentity(); // Iniciando a Matriz de cima
 	gluPerspective(30, (GLfloat)w / (GLfloat)h, 0.1, 1000.0); //Corrigindo a perspectiva
-	//glortho(-25,25,-2,2,0.1,100); //Método alternativo de fazer o mesmo
 	glMatrixMode(GL_MODELVIEW);// Voltando a trabalhar com a matriz de modelo
 }
 
-
-
-void desenha_principal()  //Função de movimentação
+void desenha_esfera()  //Função de movimentação
 {
-	/*
-	glPushMatrix(); //Abrindo as matrizes do modelo
-	glTranslatef(pos_X, pos_Y, pos_Z); // Função para movimentar, X, Y, Z
-	glColor3f(0.5, 0.5, 0.5);
-	glScalef(0.2, 0.0, 0.0); // Função da escalonar
-	glRotatef(carrot, 0, 1, 0); //Função para rodar grau, e ( x, y, z = sob os eixos que ocorrerá a movimentação)
-	glCallList(car); //Chamando o nosso objeto incializado por numero
-	glPopMatrix(); // Fechando a matriz
-	carrot = carrot + 0.6; //Aumentando em mais 0.6 o valor do carrot
-	if(carrot > 360)carrot = carrot - 360; //Se o carrot passar de 360º volte a 0 */
-
 	glPushMatrix();
-	glTranslatef (pos_X, pos_Y, pos_Z);
-	glColor3f(0.5, 0.5, 0.5);
-	//glScalef(0.2, 0.0, 0.0);
-//	glRotatef (90.0, 0.0, 0.0, 1.0);
-
-	glutSolidCube (10);
+	glTranslatef (posicao_esfera_X, posicao_esfera_Y, -105);
+	glColor3f(0.1, 0.1, 0.1);
+	//glRotatef (30.0, 0.0, 0.0, 1.0);
+	glutSolidSphere(5, 200, 200);
 	glPopMatrix();
 }
 
-
-void desenha_2()  //Função de movimentação
+void desenha_esfera_2()  //Função de movimentação
 {
-	/*
-	glPushMatrix(); //Abrindo as matrizes do modelo
-	glTranslatef(pos_X, pos_Y, pos_Z); // Função para movimentar, X, Y, Z
-	glColor3f(0.5, 0.5, 0.5);
-	glScalef(0.2, 0.0, 0.0); // Função da escalonar
-	glRotatef(carrot, 0, 1, 0); //Função para rodar grau, e ( x, y, z = sob os eixos que ocorrerá a movimentação)
-	glCallList(car); //Chamando o nosso objeto incializado por numero
-	glPopMatrix(); // Fechando a matriz
-	carrot = carrot + 0.6; //Aumentando em mais 0.6 o valor do carrot
-	if(carrot > 360)carrot = carrot - 360; //Se o carrot passar de 360º volte a 0 */
-
 	glPushMatrix();
-	glTranslatef (pos_X+10, pos_Y+10, pos_Z);
-	glColor3f(0.5, 0.5, 0.5);
-	//glScalef(0.2, 0.0, 0.0);
-//	glRotatef (90.0, 0.0, 0.0, 1.0);
-
-	glutSolidCube (10);
+	if(colisao_esferas == false)
+	{
+		glTranslatef(posicao_esfera_2_X, posicao_esfera_2_Y, -105);
+		glColor3f(0.5, 0.5, 0.5);
+	}
+	else //colisao_esferas == true
+	{
+		posicao_esfera_2_X = (rand() % 51) - 40;
+		posicao_esfera_2_Y = (rand() % 31) - 20;
+		glTranslatef(posicao_esfera_2_X, posicao_esfera_2_Y, -105);
+		colisao_esferas = false;
+		glColor3f(0.5, 0.5, 0.5);
+	}
+	glutSolidSphere(3.5, 200, 200);
+	glRotatef (100.0, 100.0, 0.0, 1.0);
 	glPopMatrix();
-
-
 }
 
 void display(void)  //Função chamada a cada quadro
@@ -170,8 +141,15 @@ void display(void)  //Função chamada a cada quadro
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Limpar tela
 	glLoadIdentity(); //Carregar as entidades
 	gluLookAt (0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-	//chamada da função acima.
-	desenha_principal();
+	desenha_esfera();
+	desenha_esfera_2();
+	testa_colisao_esferas();
+
+	//Texto
+	char string[50];
+	sprintf(string, "Pontos: %d", pontos); //Prencho a string
+	desenha_texto(string, -2.6, 1, GLUT_BITMAP_9_BY_15);
+
 	glutSwapBuffers(); //auxiliar na troca dos buffers(trabalha com a memoria)
 }
 
@@ -182,87 +160,124 @@ void keyboard(unsigned char key, int x, int y)
 	{
 
 	case 'W':
-		if(pos_Y == 30)
+		if(posicao_esfera_Y == 30)
 		{
 			break;
 		}
 		else
 		{
-			pos_Y += 10;
+			posicao_esfera_Y += 10;
 		}
 		break;
 	case 'w':
-		if(pos_Y == 30)
+		if(posicao_esfera_Y == 30)
 		{
 			break;
 		}
 		else
 		{
-			pos_Y += 10;
+			posicao_esfera_Y += 10;
 		}
 		break;
 	case 'S':
-		if(pos_Y == -30)
+		if(posicao_esfera_Y == -30)
 		{
 			break;
 		}
 		else
 		{
-			pos_Y -= 10;
+			posicao_esfera_Y -= 10;
 		}
 		break;
 	case 's':
-		if(pos_Y == -30)
+		if(posicao_esfera_Y == -30)
 		{
 			break;
 		}
 		else
 		{
-			pos_Y -= 10;
+			posicao_esfera_Y -= 10;
 		}
 		break;
 	case 'A':
-		if(pos_X == -60)
+		if(posicao_esfera_X == -50)
 		{
 			break;
 		}
 		else
 		{
-			pos_X -= 10;
+			posicao_esfera_X -= 10;
 		}
 		break;
 	case 'a':
-		if(pos_X == -50)
+		if(posicao_esfera_X == -50)
 		{
 			break;
 		}
 		else
 		{
-			pos_X -= 10;
+			posicao_esfera_X -= 10;
 		}
 		break;
 	case 'D':
-		if(pos_X == 50)
+		if(posicao_esfera_X == 50)
 		{
 			break;
 		}
 		else
 		{
-			pos_X += 10;
+			posicao_esfera_X += 10;
 		}
 		break;
 	case 'd':
-		if(pos_X == 50)
+		if(posicao_esfera_X == 50)
 		{
 			break;
 		}
 		else
 		{
-			pos_X += 10;
+			posicao_esfera_X += 10;
 		}
 		break;
 	default:
 		break;
 	}
 	glutPostRedisplay();
+}
+
+void testa_colisao_esferas()
+{
+	float distancia;
+	distancia = sqrt(((posicao_esfera_2_X - posicao_esfera_X) * (posicao_esfera_2_X - posicao_esfera_X)) + ((posicao_esfera_2_Y - posicao_esfera_Y) * (posicao_esfera_2_Y - posicao_esfera_Y)));
+	if(distancia <= 8.5)
+	{
+		colisao_esferas = true;
+		pontos++;
+	}
+
+	/*
+	if((posicao_esfera_X - posicao_esfera_2_X)) && (posicao_esfera_Y == posicao_esfera_2_Y))
+	{
+		colisao_esferas = true;
+	} */
+}
+
+void desenha_texto(char *string, int x, int y, void *fonte)
+{
+	glPushMatrix();
+	glColor3f(0.0, 0.0, 0.0);
+	glRasterPos2f(x, y);
+	while (*string)
+	{
+		glutBitmapCharacter(fonte, *string++);
+	}
+	glPopMatrix();
+}
+
+void iniciar_aleatorio(void)
+{
+	srand((unsigned int)time(NULL));
+	rand();
+//	rand();
+//	rand();
 }
